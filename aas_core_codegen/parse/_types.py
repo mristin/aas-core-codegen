@@ -771,7 +771,46 @@ class Enumeration:
         }  # type: Mapping[Identifier, EnumerationLiteral]
 
 
-OurType = Union[AbstractClass, ConcreteClass, Enumeration]
+class NamedUnion:
+    """
+    Represent a named union of classes in the meta-model.
+
+    For example:
+
+    .. code-block::
+
+        Xxx = Union[Yyy, Zzz]
+    """
+
+    #: Name of the named union
+    name: Final[Identifier]
+
+    #: Names of the classes which are the members of the named union
+    members: Final[Sequence[Identifier]]
+
+    #: Original node of the meta-model's Python AST
+    node: Final[ast.Assign]
+
+    def __init__(
+        self,
+        name: Identifier,
+        members: Sequence[Identifier],
+        node: ast.Assign,
+    ) -> None:
+        """Initialize with the given values."""
+        self.name = name
+        self.members = members
+        self.node = node
+
+    def __repr__(self) -> str:
+        """Represent the instance as a string for easier debugging."""
+        return (
+            f"<{_MODULE_NAME}.{self.__class__.__name__} "
+            f"{self.name} at 0x{id(self):x}>"
+        )
+
+
+OurType = Union[AbstractClass, ConcreteClass, Enumeration, NamedUnion]
 
 
 class MetaModel:

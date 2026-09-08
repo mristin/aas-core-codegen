@@ -16,6 +16,7 @@ from aas_core_codegen.parse._types import (
     Default,
     Enumeration,
     EnumerationLiteral,
+    NamedUnion,
     Property,
     SelfTypeAnnotation,
     SetLiteral,
@@ -392,6 +393,19 @@ def _stringify_enumeration(that: Enumeration) -> stringify.Entity:
     return result
 
 
+def _stringify_named_union(that: NamedUnion) -> stringify.Entity:
+    result = stringify.Entity(
+        name=that.__class__.__name__,
+        properties=[
+            stringify.Property("name", that.name),
+            stringify.Property("members", that.members),
+            stringify.PropertyEllipsis("node", that.node),
+        ],
+    )
+
+    return result
+
+
 def _stringify_meta_model(
     that: MetaModel,
 ) -> stringify.Entity:
@@ -459,6 +473,7 @@ Dumpable = Union[
     ImplementationSpecificMethod,
     Invariant,
     MetaModel,
+    NamedUnion,
     Property,
     SelfTypeAnnotation,
     Serialization,
@@ -490,6 +505,7 @@ _DISPATCH = {
     Description: _stringify_description,
     Enumeration: _stringify_enumeration,
     EnumerationLiteral: _stringify_enumeration_literal,
+    NamedUnion: _stringify_named_union,
     ImplementationSpecificMethod: _stringify_implementation_specific_method,
     Invariant: _stringify_invariant,
     MetaModel: _stringify_meta_model,

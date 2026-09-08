@@ -4984,6 +4984,19 @@ def translate(
                 )
                 continue
 
+        elif isinstance(parsed_our_type, parse.NamedUnion):
+            # NOTE (mristin):
+            # Named unions are not translated to the intermediate representation
+            # yet, so we report a clear error instead of silently ignoring them.
+            underlying_errors.append(
+                Error(
+                    parsed_our_type.node,
+                    f"Named unions are not supported yet "
+                    f"in the intermediate translation: {parsed_our_type.name!r}",
+                )
+            )
+            continue
+
         else:
             assert_never(parsed_our_type)
 
