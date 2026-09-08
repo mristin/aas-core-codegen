@@ -91,6 +91,57 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="listStructuralProperty">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:group ref="structuralUnion_choice" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="listMixedProperty">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:group ref="mixedUnion_choice" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="listModelTypedProperty">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:group ref="modelTypedUnion_choice" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="tupleProperty">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:group ref="structuralUnion_choice"/>
+            <xs:group ref="mixedUnion_choice"/>
+            <xs:group ref="modelTypedUnion_choice"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="optionalStructuralProperty" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:group ref="structuralUnion_choice"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="optionalMixedProperty" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:group ref="mixedUnion_choice"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="optionalModelTypedProperty" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:group ref="modelTypedUnion_choice"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
   </xs:group>
   <xs:group name="structuralFirst">

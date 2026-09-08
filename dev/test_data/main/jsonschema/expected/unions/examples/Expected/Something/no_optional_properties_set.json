@@ -39,15 +39,5 @@
       "someProperty": "value",
       "modelType": "ModelTypedSecond"
     }
-  ],
-  "optionalStructuralProperty": {
-    "uniqueToSecond": "optional-value"
-  },
-  "optionalMixedProperty": {
-    "uniqueToConcreteLeaf": "optional-leaf-value"
-  },
-  "optionalModelTypedProperty": {
-    "someProperty": "value",
-    "modelType": "ModelTypedSecond"
-  }
+  ]
 }

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Optional, Tuple, Union
 
 from icontract import DBC
 
@@ -114,15 +114,42 @@ class Something(DBC):
     mixed_property: Mixed_union
     model_typed_property: Model_typed_union
 
+    #: Test a list of a named union, one property per dispatch kind
+    list_structural_property: List[Structural_union]
+    list_mixed_property: List[Mixed_union]
+    list_model_typed_property: List[Model_typed_union]
+
+    #: Test a tuple mixing all three dispatch kinds of named unions
+    tuple_property: Tuple[Structural_union, Mixed_union, Model_typed_union]
+
+    #: Test an optional named union, one property per dispatch kind
+    optional_structural_property: Optional[Structural_union]
+    optional_mixed_property: Optional[Mixed_union]
+    optional_model_typed_property: Optional[Model_typed_union]
+
     def __init__(
         self,
         structural_property: Structural_union,
         mixed_property: Mixed_union,
         model_typed_property: Model_typed_union,
+        list_structural_property: List[Structural_union],
+        list_mixed_property: List[Mixed_union],
+        list_model_typed_property: List[Model_typed_union],
+        tuple_property: Tuple[Structural_union, Mixed_union, Model_typed_union],
+        optional_structural_property: Optional[Structural_union] = None,
+        optional_mixed_property: Optional[Mixed_union] = None,
+        optional_model_typed_property: Optional[Model_typed_union] = None,
     ) -> None:
         self.structural_property = structural_property
         self.mixed_property = mixed_property
         self.model_typed_property = model_typed_property
+        self.list_structural_property = list_structural_property
+        self.list_mixed_property = list_mixed_property
+        self.list_model_typed_property = list_model_typed_property
+        self.tuple_property = tuple_property
+        self.optional_structural_property = optional_structural_property
+        self.optional_mixed_property = optional_mixed_property
+        self.optional_model_typed_property = optional_model_typed_property
 
 
 __version__ = "dummy"

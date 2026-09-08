@@ -770,6 +770,97 @@ SymbolTable(
           specified_for='Reference to ConcreteClass Something',
           json_name='modelTypedProperty',
           xml_name='modelTypedProperty',
+          parsed=...),
+        Property(
+          name='list_structural_property',
+          type_annotation=ListTypeAnnotation(
+            items=OurTypeAnnotation(
+              our_type='Reference to our type Structural_union',
+              parsed=...),
+            parsed=...),
+          description=None,
+          specified_for='Reference to ConcreteClass Something',
+          json_name='listStructuralProperty',
+          xml_name='listStructuralProperty',
+          parsed=...),
+        Property(
+          name='list_mixed_property',
+          type_annotation=ListTypeAnnotation(
+            items=OurTypeAnnotation(
+              our_type='Reference to our type Mixed_union',
+              parsed=...),
+            parsed=...),
+          description=None,
+          specified_for='Reference to ConcreteClass Something',
+          json_name='listMixedProperty',
+          xml_name='listMixedProperty',
+          parsed=...),
+        Property(
+          name='list_model_typed_property',
+          type_annotation=ListTypeAnnotation(
+            items=OurTypeAnnotation(
+              our_type='Reference to our type Model_typed_union',
+              parsed=...),
+            parsed=...),
+          description=None,
+          specified_for='Reference to ConcreteClass Something',
+          json_name='listModelTypedProperty',
+          xml_name='listModelTypedProperty',
+          parsed=...),
+        Property(
+          name='tuple_property',
+          type_annotation=TupleTypeAnnotation(
+            items=[
+              OurTypeAnnotation(
+                our_type='Reference to our type Structural_union',
+                parsed=...),
+              OurTypeAnnotation(
+                our_type='Reference to our type Mixed_union',
+                parsed=...),
+              OurTypeAnnotation(
+                our_type='Reference to our type Model_typed_union',
+                parsed=...)],
+            parsed=...),
+          description=None,
+          specified_for='Reference to ConcreteClass Something',
+          json_name='tupleProperty',
+          xml_name='tupleProperty',
+          parsed=...),
+        Property(
+          name='optional_structural_property',
+          type_annotation=OptionalTypeAnnotation(
+            value=OurTypeAnnotation(
+              our_type='Reference to our type Structural_union',
+              parsed=...),
+            parsed=...),
+          description=None,
+          specified_for='Reference to ConcreteClass Something',
+          json_name='optionalStructuralProperty',
+          xml_name='optionalStructuralProperty',
+          parsed=...),
+        Property(
+          name='optional_mixed_property',
+          type_annotation=OptionalTypeAnnotation(
+            value=OurTypeAnnotation(
+              our_type='Reference to our type Mixed_union',
+              parsed=...),
+            parsed=...),
+          description=None,
+          specified_for='Reference to ConcreteClass Something',
+          json_name='optionalMixedProperty',
+          xml_name='optionalMixedProperty',
+          parsed=...),
+        Property(
+          name='optional_model_typed_property',
+          type_annotation=OptionalTypeAnnotation(
+            value=OurTypeAnnotation(
+              our_type='Reference to our type Model_typed_union',
+              parsed=...),
+            parsed=...),
+          description=None,
+          specified_for='Reference to ConcreteClass Something',
+          json_name='optionalModelTypedProperty',
+          xml_name='optionalModelTypedProperty',
           parsed=...)],
       methods=[],
       constructor=Constructor(
@@ -795,6 +886,82 @@ SymbolTable(
               our_type='Reference to our type Model_typed_union',
               parsed=...),
             default=None,
+            parsed=...),
+          Argument(
+            name='list_structural_property',
+            type_annotation=ListTypeAnnotation(
+              items=OurTypeAnnotation(
+                our_type='Reference to our type Structural_union',
+                parsed=...),
+              parsed=...),
+            default=None,
+            parsed=...),
+          Argument(
+            name='list_mixed_property',
+            type_annotation=ListTypeAnnotation(
+              items=OurTypeAnnotation(
+                our_type='Reference to our type Mixed_union',
+                parsed=...),
+              parsed=...),
+            default=None,
+            parsed=...),
+          Argument(
+            name='list_model_typed_property',
+            type_annotation=ListTypeAnnotation(
+              items=OurTypeAnnotation(
+                our_type='Reference to our type Model_typed_union',
+                parsed=...),
+              parsed=...),
+            default=None,
+            parsed=...),
+          Argument(
+            name='tuple_property',
+            type_annotation=TupleTypeAnnotation(
+              items=[
+                OurTypeAnnotation(
+                  our_type='Reference to our type Structural_union',
+                  parsed=...),
+                OurTypeAnnotation(
+                  our_type='Reference to our type Mixed_union',
+                  parsed=...),
+                OurTypeAnnotation(
+                  our_type='Reference to our type Model_typed_union',
+                  parsed=...)],
+              parsed=...),
+            default=None,
+            parsed=...),
+          Argument(
+            name='optional_structural_property',
+            type_annotation=OptionalTypeAnnotation(
+              value=OurTypeAnnotation(
+                our_type='Reference to our type Structural_union',
+                parsed=...),
+              parsed=...),
+            default=DefaultPrimitive(
+              value=None,
+              parsed=...),
+            parsed=...),
+          Argument(
+            name='optional_mixed_property',
+            type_annotation=OptionalTypeAnnotation(
+              value=OurTypeAnnotation(
+                our_type='Reference to our type Mixed_union',
+                parsed=...),
+              parsed=...),
+            default=DefaultPrimitive(
+              value=None,
+              parsed=...),
+            parsed=...),
+          Argument(
+            name='optional_model_typed_property',
+            type_annotation=OptionalTypeAnnotation(
+              value=OurTypeAnnotation(
+                our_type='Reference to our type Model_typed_union',
+                parsed=...),
+              parsed=...),
+            default=DefaultPrimitive(
+              value=None,
+              parsed=...),
             parsed=...)],
         returns=None,
         description=None,
@@ -820,6 +987,41 @@ SymbolTable(
             AssignArgument(
               name='model_typed_property',
               argument='model_typed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='list_structural_property',
+              argument='list_structural_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='list_mixed_property',
+              argument='list_mixed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='list_model_typed_property',
+              argument='list_model_typed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='tuple_property',
+              argument='tuple_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='optional_structural_property',
+              argument='optional_structural_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='optional_mixed_property',
+              argument='optional_mixed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='optional_model_typed_property',
+              argument='optional_model_typed_property',
               default=None)""")],
         inlined_statements=[
           textwrap.dedent("""\
@@ -836,6 +1038,41 @@ SymbolTable(
             AssignArgument(
               name='model_typed_property',
               argument='model_typed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='list_structural_property',
+              argument='list_structural_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='list_mixed_property',
+              argument='list_mixed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='list_model_typed_property',
+              argument='list_model_typed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='tuple_property',
+              argument='tuple_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='optional_structural_property',
+              argument='optional_structural_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='optional_mixed_property',
+              argument='optional_mixed_property',
+              default=None)"""),
+          textwrap.dedent("""\
+            AssignArgument(
+              name='optional_model_typed_property',
+              argument='optional_model_typed_property',
               default=None)""")]),
       invariants=[],
       serialization=Serialization(

@@ -193,12 +193,60 @@
         },
         "modelTypedProperty": {
           "$ref": "#/definitions/ModelTypedUnion_choice"
+        },
+        "listStructuralProperty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StructuralUnion_choice"
+          }
+        },
+        "listMixedProperty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MixedUnion_choice"
+          }
+        },
+        "listModelTypedProperty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ModelTypedUnion_choice"
+          }
+        },
+        "tupleProperty": {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/StructuralUnion_choice"
+            },
+            {
+              "$ref": "#/definitions/MixedUnion_choice"
+            },
+            {
+              "$ref": "#/definitions/ModelTypedUnion_choice"
+            }
+          ],
+          "minItems": 3,
+          "maxItems": 3,
+          "additionalItems": false
+        },
+        "optionalStructuralProperty": {
+          "$ref": "#/definitions/StructuralUnion_choice"
+        },
+        "optionalMixedProperty": {
+          "$ref": "#/definitions/MixedUnion_choice"
+        },
+        "optionalModelTypedProperty": {
+          "$ref": "#/definitions/ModelTypedUnion_choice"
         }
       },
       "required": [
         "structuralProperty",
         "mixedProperty",
-        "modelTypedProperty"
+        "modelTypedProperty",
+        "listStructuralProperty",
+        "listMixedProperty",
+        "listModelTypedProperty",
+        "tupleProperty"
       ]
     },
     "StructuralFirst": {
