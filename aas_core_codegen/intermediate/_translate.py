@@ -4217,8 +4217,7 @@ def _verify_named_unions_are_dispatchable_in_json(
         if len(implementers_without_model_type) == 0:
             continue
 
-        # region Check that the required properties are pairwise disjoint among
-        # the implementers which are not already dispatchable by ``modelType``
+        # region Check required properties disjoint among non-modelType implementers
 
         required_property_names_by_implementer = {
             implementer: [
@@ -5404,8 +5403,7 @@ def translate(
 
     # endregion
 
-    # region Check that there are no cycles among the named unions, and determine
-    # region a topological order over them
+    # region Topologically sort named unions, checking for cycles
 
     (
         named_unions_topologically_sorted,
