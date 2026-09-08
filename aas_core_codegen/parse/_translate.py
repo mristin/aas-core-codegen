@@ -3124,12 +3124,12 @@ def _ast_assign_to_named_union(
 
         members.append(Identifier(member_node.id))
 
-    if len(members) < 2:
+    if len(members) < 1:
         return (
             None,
             Error(
                 node,
-                f"Expected at least 2 members in the named union {name!r}, "
+                f"Expected at least 1 member in the named union {name!r}, "
                 f"but got {len(members)}: {atok.get_text(node.value)}",
             ),
         )

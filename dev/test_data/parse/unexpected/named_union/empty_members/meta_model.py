@@ -1,11 +1,7 @@
 from typing import Union
 
 
-class Some_class:
-    pass
-
-
-Some_union = Union[Some_class]
+Some_union = Union[()]
 
 
 __version__ = "dummy"

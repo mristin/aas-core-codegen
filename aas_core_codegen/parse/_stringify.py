@@ -428,6 +428,13 @@ def _stringify_unverified_symbol_table(
         name=that.__class__.__name__,
         properties=[
             stringify.Property("our_types", list(map(_stringify, that.our_types))),
+            stringify.Property(
+                "named_unions",
+                [
+                    f"Reference to our type {named_union.name}"
+                    for named_union in that.named_unions
+                ],
+            ),
             stringify.Property("constants", list(map(_stringify, that.constants))),
             stringify.Property(
                 "verification_functions",
@@ -445,6 +452,13 @@ def _stringify_symbol_table(that: SymbolTable) -> stringify.Entity:
         name=that.__class__.__name__,
         properties=[
             stringify.Property("our_types", list(map(_stringify, that.our_types))),
+            stringify.Property(
+                "named_unions",
+                [
+                    f"Reference to our type {named_union.name}"
+                    for named_union in that.named_unions
+                ],
+            ),
             stringify.Property("constants", list(map(_stringify, that.constants))),
             stringify.Property(
                 "verification_functions",

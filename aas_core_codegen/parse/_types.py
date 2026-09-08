@@ -791,6 +791,16 @@ class NamedUnion:
     #: Original node of the meta-model's Python AST
     node: Final[ast.Assign]
 
+    # fmt: off
+    @require(
+        lambda members: len(members) >= 1,
+        "At least one member in the named union"
+    )
+    @require(
+        lambda members: len(members) == len(set(members)),
+        "Unique members in the named union"
+    )
+    # fmt: on
     def __init__(
         self,
         name: Identifier,
@@ -850,6 +860,9 @@ class UnverifiedSymbolTable(DBC):
     #: List of parsed our types
     our_types: Final[Sequence[OurType]]
 
+    #: List of all the named unions in the symbol table
+    named_unions: Final[Sequence[NamedUnion]]
+
     #: List of constants in the meta-model
     constants: Final[Sequence["ConstantUnion"]]
 
@@ -907,6 +920,10 @@ class UnverifiedSymbolTable(DBC):
         self.constants = constants
         self.verification_functions = verification_functions
         self.meta_model = meta_model
+
+        self.named_unions = [
+            our_type for our_type in our_types if isinstance(our_type, NamedUnion)
+        ]
 
         self._name_to_our_type = {our_type.name: our_type for our_type in our_types}
         self._name_to_constant = {constant.name: constant for constant in constants}
