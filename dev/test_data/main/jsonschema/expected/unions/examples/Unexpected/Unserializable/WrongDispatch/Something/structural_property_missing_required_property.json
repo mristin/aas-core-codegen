@@ -1,0 +1,10 @@
+{
+  "structuralProperty": {},
+  "mixedProperty": {
+    "uniqueToConcreteLeaf": "leaf-value"
+  },
+  "modelTypedProperty": {
+    "someProperty": "value",
+    "modelType": "ModelTypedFirst"
+  }
+}

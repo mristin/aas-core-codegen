@@ -1,0 +1,12 @@
+{
+  "structuralProperty": {
+    "uniqueToFirst": "hello"
+  },
+  "mixedProperty": {
+    "someUnrelatedProperty": "does not match any implementer of Mixed_union"
+  },
+  "modelTypedProperty": {
+    "someProperty": "value",
+    "modelType": "ModelTypedFirst"
+  }
+}

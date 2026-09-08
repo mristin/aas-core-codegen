@@ -1,0 +1,13 @@
+{
+  "structuralProperty": {
+    "uniqueToFirst": "hello"
+  },
+  "mixedProperty": {
+    "uniqueToAbstractDescendantOne": "descendant-one-value",
+    "uniqueToAbstractDescendantTwo": "descendant-two-value"
+  },
+  "modelTypedProperty": {
+    "someProperty": "value",
+    "modelType": "ModelTypedFirst"
+  }
+}
