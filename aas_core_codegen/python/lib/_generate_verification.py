@@ -678,15 +678,18 @@ def _transpile_invariant(
     return Stripped(writer.getvalue()), None
 
 
-OurTypeExceptEnumeration = Union[
+OurTypeExceptEnumerationAndNamedUnion = Union[
     intermediate.ConstrainedPrimitive,
     intermediate.AbstractClass,
     intermediate.ConcreteClass,
 ]
 assert_union_without_excluded(
     original_union=intermediate.OurType,
-    subset_union=OurTypeExceptEnumeration,
-    excluded=[intermediate.Enumeration],
+    subset_union=OurTypeExceptEnumerationAndNamedUnion,
+    # NOTE (mristin):
+    # Named unions have no verification logic of their own (no properties or
+    # invariants), so they are excluded here just like enumerations.
+    excluded=[intermediate.Enumeration, intermediate.NamedUnion],
 )
 
 

@@ -1,1 +1,0 @@
-Expected the members of the named union 'Yet_another_union' to be classes, but the member 'Some_union' is a 'NamedUnion'

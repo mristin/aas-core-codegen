@@ -2843,15 +2843,15 @@ def _verify_symbol_table(
                     )
                 )
 
-            elif isinstance(member_type, Class):
-                # A named union can be defined over classes.
+            elif isinstance(member_type, (Class, NamedUnion)):
+                # A named union can be defined over classes and other named unions.
                 pass
             else:
                 errors.append(
                     Error(
                         our_type.node,
                         f"Expected the members of the named union "
-                        f"{our_type.name!r} to be classes, "
+                        f"{our_type.name!r} to be classes or named unions, "
                         f"but the member {member_type.name!r} is "
                         f"a {member_type.__class__.__name__!r}",
                     )
