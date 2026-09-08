@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<something xmlns="https://dummy.com">
+  <structuralProperty>
+    <structuralFirst>
+      <uniqueToFirst>hello</uniqueToFirst>
+    </structuralFirst>
+  </structuralProperty>
+  <mixedProperty>
+    <mixedConcreteWithDescendantsChild>
+      <someBaseProperty>base-value</someBaseProperty>
+      <someChildProperty>child-value</someChildProperty>
+    </mixedConcreteWithDescendantsChild>
+  </mixedProperty>
+  <modelTypedProperty>
+    <modelTypedFirst>
+      <someProperty>value</someProperty>
+    </modelTypedFirst>
+  </modelTypedProperty>
+</something>

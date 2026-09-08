@@ -943,6 +943,11 @@ class Test_xsd(_TestCase):
             target=aas_core_codegen.main.Target.XSD, case_name="tuples"
         )
 
+    def test_expected_unions(self) -> None:
+        self._run_expected_test(
+            target=aas_core_codegen.main.Target.XSD, case_name="unions"
+        )
+
 
 class _CaseSpec:
     """Specify a single test."""
