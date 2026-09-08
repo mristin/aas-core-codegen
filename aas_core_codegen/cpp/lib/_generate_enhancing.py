@@ -360,7 +360,7 @@ def _generate_wrap_snippet_for_required_property(
             return Stripped("")
 
         elif isinstance(
-            type_anno.our_type, (intermediate.AbstractClass, intermediate.ConcreteClass)
+            type_anno.our_type, (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion)
         ):
             # NOTE (mristin):
             # The non-mutating getter means here that we will not change the reference,
@@ -398,7 +398,7 @@ that->{setter_name}(
 
             elif isinstance(
                 type_anno.items.our_type,
-                (intermediate.AbstractClass, intermediate.ConcreteClass),
+                (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
             ):
                 getter_name = cpp_naming.getter_name(prop.name)
 
@@ -493,7 +493,7 @@ that->{setter_name}(
                 item_type_anno, intermediate.OurTypeAnnotation
             ) and isinstance(
                 item_type_anno.our_type,
-                (intermediate.AbstractClass, intermediate.ConcreteClass),
+                (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
             ):
                 class_indices.append(i)
 
@@ -579,7 +579,7 @@ def _generate_wrap_snippet_for_optional_property(
             return Stripped("")
 
         elif isinstance(
-            type_anno.our_type, (intermediate.AbstractClass, intermediate.ConcreteClass)
+            type_anno.our_type, (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion)
         ):
             # NOTE (mristin):
             # The non-mutating getter means here that we will not change the reference,
@@ -623,7 +623,7 @@ if (that->{getter_name}().has_value()) {{
             type_anno.items, intermediate.OurTypeAnnotation
         ) and isinstance(
             type_anno.items.our_type,
-            (intermediate.AbstractClass, intermediate.ConcreteClass),
+            (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
         ), (
             f"NOTE (mristin): We expect only lists of classes "
             f"at the moment, but you specified {type_anno}. "
@@ -685,7 +685,7 @@ if (that->{getter_name}().has_value()) {{
                 item_type_anno, intermediate.OurTypeAnnotation
             ) and isinstance(
                 item_type_anno.our_type,
-                (intermediate.AbstractClass, intermediate.ConcreteClass),
+                (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
             ):
                 class_indices.append(i)
 

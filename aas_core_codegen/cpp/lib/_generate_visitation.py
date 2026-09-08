@@ -329,7 +329,12 @@ def _generate_recursive_visit_for_property(
             return Stripped("")
 
         elif isinstance(
-            type_anno.our_type, (intermediate.AbstractClass, intermediate.ConcreteClass)
+            type_anno.our_type,
+            (
+                intermediate.AbstractClass,
+                intermediate.ConcreteClass,
+                intermediate.NamedUnion,
+            ),
         ):
             code = Stripped(
                 f"""\
@@ -358,7 +363,11 @@ Visit(
 
             elif isinstance(
                 type_anno.items.our_type,
-                (intermediate.AbstractClass, intermediate.ConcreteClass),
+                (
+                    intermediate.AbstractClass,
+                    intermediate.ConcreteClass,
+                    intermediate.NamedUnion,
+                ),
             ):
                 item_type = cpp_common.generate_type_with_const_ref_if_applicable(
                     type_annotation=type_anno.items,
@@ -400,7 +409,11 @@ for (
                 item_type_anno, intermediate.OurTypeAnnotation
             ) and isinstance(
                 item_type_anno.our_type,
-                (intermediate.AbstractClass, intermediate.ConcreteClass),
+                (
+                    intermediate.AbstractClass,
+                    intermediate.ConcreteClass,
+                    intermediate.NamedUnion,
+                ),
             ):
                 visit_stmts.append(
                     Stripped(

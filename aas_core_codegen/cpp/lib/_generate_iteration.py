@@ -787,7 +787,7 @@ class IteratorQualities:
 
                 elif isinstance(
                     type_anno.our_type,
-                    (intermediate.AbstractClass, intermediate.ConcreteClass),
+                    (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
                 ):
                     relevant_properties.append(prop)
 
@@ -809,7 +809,7 @@ class IteratorQualities:
 
                     elif isinstance(
                         type_anno.items.our_type,
-                        (intermediate.AbstractClass, intermediate.ConcreteClass),
+                        (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
                     ):
                         cls_contains_a_list_or_tuple_property = True
 
@@ -842,7 +842,7 @@ class IteratorQualities:
                         item_type_anno, intermediate.OurTypeAnnotation
                     ) and isinstance(
                         item_type_anno.our_type,
-                        (intermediate.AbstractClass, intermediate.ConcreteClass),
+                        (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
                     ):
                         contains_a_class = True
 
@@ -965,7 +965,7 @@ done_ = false;"""
         property_literal = cpp_naming.enum_literal_name(prop.name)
 
         if isinstance(type_anno, intermediate.OurTypeAnnotation) and isinstance(
-            type_anno.our_type, (intermediate.AbstractClass, intermediate.ConcreteClass)
+            type_anno.our_type, (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion)
         ):
             if isinstance(prop.type_annotation, intermediate.OptionalTypeAnnotation):
                 flow.append(
@@ -1006,7 +1006,7 @@ item_ = std::move(
                 type_anno.items, intermediate.OurTypeAnnotation
             ) and isinstance(
                 type_anno.items.our_type,
-                (intermediate.AbstractClass, intermediate.ConcreteClass),
+                (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
             ), (
                 f"NOTE (mristin): We expect only lists of classes "
                 f"at the moment, but you specified {prop.type_annotation} "
@@ -1097,7 +1097,7 @@ item_ = std::move(
                 if isinstance(item_type_anno, intermediate.OurTypeAnnotation)
                 and isinstance(
                     item_type_anno.our_type,
-                    (intermediate.AbstractClass, intermediate.ConcreteClass),
+                    (intermediate.AbstractClass, intermediate.ConcreteClass, intermediate.NamedUnion),
                 )
             ]
             assert len(class_indices) > 0, (

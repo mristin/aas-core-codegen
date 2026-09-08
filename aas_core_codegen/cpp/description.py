@@ -221,6 +221,15 @@ class _ElementRenderer(intermediate_doc.DocutilsElementTransformer[str]):
             name = cpp_naming.class_name(element.our_type.name)
             result = f"`{name}`"
 
+        elif isinstance(element.our_type, intermediate.NamedUnion):
+            # NOTE (mristin):
+            # A named union has no C++ type declaration of its own -- it is
+            # always inlined as a ``std::variant`` -- so we leave it here as
+            # a literal, mirroring how a constrained primitive is referenced.
+
+            name = cpp_naming.class_name(element.our_type.name)
+            result = f"`{name}`"
+
         else:
             assert_never(element.our_type)
 
