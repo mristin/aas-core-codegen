@@ -1,0 +1,14 @@
+{
+  "structuralProperty": {
+    "uniqueToFirst": "hello"
+  },
+  "mixedProperty": {
+    "someBaseProperty": "base-value",
+    "someChildProperty": "child-value",
+    "modelType": "MixedConcreteWithDescendantsChild"
+  },
+  "modelTypedProperty": {
+    "someProperty": "value",
+    "modelType": "ModelTypedFirst"
+  }
+}

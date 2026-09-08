@@ -1,0 +1,12 @@
+{
+  "structuralProperty": {
+    "uniqueToSecond": "world"
+  },
+  "mixedProperty": {
+    "uniqueToAbstractDescendantOne": "descendant-value"
+  },
+  "modelTypedProperty": {
+    "someProperty": "value",
+    "modelType": "ModelTypedSecond"
+  }
+}
