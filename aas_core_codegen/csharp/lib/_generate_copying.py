@@ -21,6 +21,8 @@ from aas_core_codegen.csharp import (
 from aas_core_codegen.csharp.common import (
     INDENT as I,
     INDENT2 as II,
+    INDENT3 as III,
+    INDENT4 as IIII,
 )
 
 
@@ -302,6 +304,53 @@ if (that.{prop_name} != null)
 }}"""
                         )
                     )
+
+            elif isinstance(
+                type_anno.items, intermediate.OurTypeAnnotation
+            ) and isinstance(type_anno.items.our_type, intermediate.NamedUnion):
+                # NOTE (mristin):
+                # A named union is not itself an ``Aas.IClass``, so we deep-copy
+                # each item's underlying instance and wrap the result back into
+                # the union based on its run-time type. We keep this as its own
+                # branch, separate from the class branch above, so that it can
+                # diverge independently, *e.g.* if primitive alternatives are
+                # ever allowed into a named union.
+                item_union_name = csharp_naming.class_name(
+                    type_anno.items.our_type.name
+                )
+
+                if not optional:
+                    body_blocks.append(
+                        Stripped(
+                            f"""\
+var {variable_name} = new {variable_type}(
+{I}that.{prop_name}.Count);
+foreach (var item in that.{prop_name})
+{{
+{I}{variable_name}.Add(
+{II}Aas.{item_union_name}.FromUnderlying(
+{III}Deep(item.Underlying)));
+}}"""
+                        )
+                    )
+                else:
+                    body_blocks.append(
+                        Stripped(
+                            f"""\
+{variable_type}? {variable_name} = null;
+if (that.{prop_name} != null)
+{{
+{I}{variable_name} = new {variable_type}(
+{II}that.{prop_name}.Count);
+{I}foreach (var item in that.{prop_name})
+{I}{{
+{II}{variable_name}.Add(
+{III}Aas.{item_union_name}.FromUnderlying(
+{IIII}Deep(item.Underlying)));
+{I}}}
+}}"""
+                        )
+                    )
             else:
                 raise NotImplementedError(
                     "(mristin) We handle only lists of atomic values in the deep "
@@ -344,6 +393,33 @@ if (that.{prop_name} != null)
                         )
                     else:
                         constructor_arg_exprs.append(f"Deep(that.{prop_name})")
+
+                elif isinstance(type_anno.our_type, intermediate.NamedUnion):
+                    # NOTE (mristin):
+                    # A named union is not itself an ``Aas.IClass``, so we
+                    # deep-copy its underlying instance and wrap the result
+                    # back into the union based on its run-time type. We keep
+                    # this as its own branch, separate from the class branch
+                    # above, so that it can diverge independently, *e.g.* if
+                    # primitive alternatives are ever allowed into a named
+                    # union.
+                    union_name = csharp_naming.class_name(type_anno.our_type.name)
+
+                    if optional:
+                        constructor_arg_exprs.append(
+                            f"""\
+(that.{prop_name} != null)
+{I}? Aas.{union_name}.FromUnderlying(
+{II}Deep(that.{prop_name}.Underlying))
+{I}: null"""
+                        )
+                    else:
+                        constructor_arg_exprs.append(
+                            f"""\
+Aas.{union_name}.FromUnderlying(
+{I}Deep(that.{prop_name}.Underlying))"""
+                        )
+
                 else:
                     # noinspection PyTypeChecker
                     assert_never(type_anno.our_type)
@@ -370,6 +446,25 @@ if (that.{prop_name} != null)
                         (intermediate.AbstractClass, intermediate.ConcreteClass),
                     ):
                         item_expr = f"Deep({item_expr})"
+
+                    elif isinstance(
+                        item_type_anno, intermediate.OurTypeAnnotation
+                    ) and isinstance(item_type_anno.our_type, intermediate.NamedUnion):
+                        # NOTE (mristin):
+                        # A named union is not itself an ``Aas.IClass``, so we
+                        # deep-copy its underlying instance and wrap the result
+                        # back into the union based on its run-time type. We
+                        # keep this as its own branch, separate from the class
+                        # branch above, so that it can diverge independently,
+                        # *e.g.* if primitive alternatives are ever allowed
+                        # into a named union.
+                        item_union_name = csharp_naming.class_name(
+                            item_type_anno.our_type.name
+                        )
+                        item_expr = (
+                            f"Aas.{item_union_name}.FromUnderlying("
+                            f"Deep({item_expr}.Underlying))"
+                        )
 
                     item_exprs.append(Stripped(item_expr))
 

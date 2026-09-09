@@ -134,6 +134,20 @@ Transform(
 {I}that.{prop_name},
 {I}casted.{prop_name})"""
                 )
+            elif isinstance(type_anno.our_type, intermediate.NamedUnion):
+                # NOTE (mristin):
+                # A named union is not itself an ``Aas.IClass``, so we compare
+                # the underlying instances instead of the union values
+                # directly. We keep this as its own branch, separate from the
+                # class branch above, so that it can diverge independently,
+                # *e.g.* if primitive alternatives are ever allowed into
+                # a named union.
+                expr = Stripped(
+                    f"""\
+Transform(
+{I}that.{prop_name}.Underlying,
+{I}casted.{prop_name}.Underlying)"""
+                )
             else:
                 # noinspection PyTypeChecker
                 assert_never(type_anno.our_type)
@@ -193,6 +207,26 @@ that.{prop_name}.Count == casted.{prop_name}.Count
 {II}.Zip(
 {III}casted.{prop_name},
 {III}Transform)
+{II}.All(item => item))"""
+                    )
+                elif isinstance(type_anno.items.our_type, intermediate.NamedUnion):
+                    # NOTE (mristin):
+                    # A named union is not itself an ``Aas.IClass``, so, unlike
+                    # a class item, it can not be passed on as a bare
+                    # ``Transform`` method group -- we need a small adapter
+                    # lambda to extract the underlying instances first. We
+                    # keep this as its own branch, separate from the class
+                    # branch above, so that it can diverge independently,
+                    # *e.g.* if primitive alternatives are ever allowed into
+                    # a named union.
+                    expr = Stripped(
+                        f"""\
+that.{prop_name}.Count == casted.{prop_name}.Count
+&& (
+{I}that.{prop_name}
+{II}.Zip(
+{III}casted.{prop_name},
+{III}(t, c) => Transform(t.Underlying, c.Underlying))
 {II}.All(item => item))"""
                     )
                 else:
@@ -264,6 +298,23 @@ ByteSpansEqual(
 Transform(
 {I}{item_that},
 {I}{item_casted})"""
+                            )
+                        )
+                    elif isinstance(item_type_anno.our_type, intermediate.NamedUnion):
+                        # NOTE (mristin):
+                        # A named union is not itself an ``Aas.IClass``, so we
+                        # compare the underlying instances instead of the
+                        # union values directly. We keep this as its own
+                        # branch, separate from the class branch above, so
+                        # that it can diverge independently, *e.g.* if
+                        # primitive alternatives are ever allowed into
+                        # a named union.
+                        item_exprs.append(
+                            Stripped(
+                                f"""\
+Transform(
+{I}{item_that}.Underlying,
+{I}{item_casted}.Underlying)"""
                             )
                         )
                     else:

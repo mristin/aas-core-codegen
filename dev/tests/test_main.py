@@ -395,6 +395,11 @@ class Test_csharp(_TestCase):
             target=aas_core_codegen.main.Target.CSHARP, case_name="tuples"
         )
 
+    def test_expected_unions(self) -> None:
+        self._run_expected_test(
+            target=aas_core_codegen.main.Target.CSHARP, case_name="unions"
+        )
+
     def test_unexpected_conflict_between_transformed_keyword_and_property(self) -> None:
         self._run_unexpected_test(
             target=aas_core_codegen.main.Target.CSHARP,

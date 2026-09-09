@@ -277,6 +277,23 @@ var {casted_name} = (
 );
 that.{prop_name} = {casted_name};"""
                 )
+
+            elif isinstance(type_anno.our_type, intermediate.NamedUnion):
+                # NOTE (mristin):
+                # A named union is not itself an ``Aas.IClass``, so we transform
+                # its underlying instance and wrap the result back into the
+                # union based on its run-time type. We keep this as its own
+                # branch, separate from the class branch above, so that it can
+                # diverge independently, *e.g.* if primitive alternatives are
+                # ever allowed into a named union.
+                union_name = csharp_naming.class_name(type_anno.our_type.name)
+
+                wrap_stmt = Stripped(
+                    f"""\
+that.{prop_name} = Aas.{union_name}.FromUnderlying(
+{I}Transform(that.{prop_name}.Underlying));"""
+                )
+
             else:
                 assert_never(type_anno.our_type)
 
@@ -322,6 +339,30 @@ that.{prop_name} = (
 ).ToList();"""
                     )
 
+                elif isinstance(type_anno.items.our_type, intermediate.NamedUnion):
+                    # NOTE (mristin):
+                    # A named union is not itself an ``Aas.IClass``, so we
+                    # transform each item's underlying instance and wrap
+                    # the result back into the union based on its run-time
+                    # type. We keep this as its own branch, separate from
+                    # the class branch above, so that it can diverge
+                    # independently, *e.g.* if primitive alternatives are
+                    # ever allowed into a named union.
+                    item_union_name = csharp_naming.class_name(
+                        type_anno.items.our_type.name
+                    )
+
+                    wrap_stmt = Stripped(
+                        f"""\
+that.{prop_name} = (
+{I}that.{prop_name}
+{I}.Select(
+{II}(item) => Aas.{item_union_name}.FromUnderlying(
+{III}Transform(item.Underlying))
+{I})
+).ToList();"""
+                    )
+
                 else:
                     assert_never(type_anno.items.our_type)
             else:
@@ -337,7 +378,7 @@ that.{prop_name} = (
         elif isinstance(type_anno, intermediate.TupleTypeAnnotation):
             pre_stmts = []  # type: List[Stripped]
             item_exprs = []  # type: List[Stripped]
-            any_class_item = False
+            any_transformable_item = False
 
             for i, item_type_anno in enumerate(type_anno.items):
                 item_access = Stripped(f"that.{prop_name}.Item{i + 1}")
@@ -348,7 +389,7 @@ that.{prop_name} = (
                     item_type_anno.our_type,
                     (intermediate.AbstractClass, intermediate.ConcreteClass),
                 ):
-                    any_class_item = True
+                    any_transformable_item = True
 
                     item_interface_name = csharp_naming.interface_name(
                         item_type_anno.our_type.name
@@ -376,10 +417,41 @@ var {casted_name} = (
                     )
 
                     item_exprs.append(Stripped(casted_name))
+
+                elif isinstance(
+                    item_type_anno, intermediate.OurTypeAnnotation
+                ) and isinstance(item_type_anno.our_type, intermediate.NamedUnion):
+                    # NOTE (mristin):
+                    # A named union is not itself an ``Aas.IClass``, so we
+                    # transform its underlying instance and wrap the result
+                    # back into the union based on its run-time type. We keep
+                    # this as its own branch, separate from the class branch
+                    # above, so that it can diverge independently, *e.g.* if
+                    # primitive alternatives are ever allowed into a named
+                    # union.
+                    any_transformable_item = True
+
+                    item_union_name = csharp_naming.class_name(
+                        item_type_anno.our_type.name
+                    )
+                    casted_name = csharp_naming.variable_name(
+                        Identifier(f"casted_{prop.name}_{i}")
+                    )
+
+                    pre_stmts.append(
+                        Stripped(
+                            f"""\
+var {casted_name} = Aas.{item_union_name}.FromUnderlying(
+{I}Transform({item_access}.Underlying));"""
+                        )
+                    )
+
+                    item_exprs.append(Stripped(casted_name))
+
                 else:
                     item_exprs.append(item_access)
 
-            if not any_class_item:
+            if not any_transformable_item:
                 # We can not enhance any of the tuple items; nothing to do here.
                 continue
 

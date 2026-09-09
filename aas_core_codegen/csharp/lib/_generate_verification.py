@@ -719,6 +719,10 @@ def _generate_verify_method(our_type: intermediate.OurType) -> Stripped:
 
     elif isinstance(our_type, (intermediate.AbstractClass, intermediate.ConcreteClass)):
         return Stripped("Verification.Verify")
+    elif isinstance(our_type, intermediate.NamedUnion):
+        # A named union has no invariants of its own; verification recurses
+        # into the underlying instance via the same general dispatch function.
+        return Stripped("Verification.Verify")
     else:
         assert_never(our_type)
 
@@ -805,8 +809,17 @@ def _generate_transform_property(
     elif isinstance(type_anno, intermediate.OurTypeAnnotation):
         verify_method = _generate_verify_method(our_type=type_anno.our_type)
 
+        # NOTE (mristin):
+        # A named union is not itself an ``Aas.IClass``, so we verify its
+        # underlying instance instead of ``source_expr`` directly.
+        verify_source_expr = (
+            Stripped(f"{source_expr}.Underlying")
+            if isinstance(type_anno.our_type, intermediate.NamedUnion)
+            else source_expr
+        )
+
         foreach_error_in_verify = (
-            f"foreach (var error in {verify_method}({source_expr}))"
+            f"foreach (var error in {verify_method}({verify_source_expr}))"
         )
         # Heuristic to break the lines, very rudimentary
         if len(foreach_error_in_verify) > 80:
@@ -814,7 +827,7 @@ def _generate_transform_property(
                 f"""\
                 foreach (
                     {I}var error in {verify_method}(
-                    {II}{source_expr}))"""
+                    {II}{verify_source_expr}))"""
             )
 
         # We can't use textwrap.dedent due to foreach_snippet.
@@ -854,12 +867,23 @@ def _generate_transform_property(
                 {I}var item in {source_expr})"""
             )
 
-        foreach_error_in_verify_item = f"foreach (var error in {verify_method}(item))"
+        # NOTE (mristin):
+        # A named union is not itself an ``Aas.IClass``, so we verify its
+        # underlying instance instead of ``item`` directly.
+        verify_item_expr = (
+            "item.Underlying"
+            if isinstance(type_anno.items.our_type, intermediate.NamedUnion)
+            else "item"
+        )
+
+        foreach_error_in_verify_item = (
+            f"foreach (var error in {verify_method}({verify_item_expr}))"
+        )
         if len(foreach_error_in_verify_item) > 70:
             foreach_error_in_verify_item = textwrap.dedent(
                 f"""\
                 foreach (
-                {I}var error in {verify_method}(item))"""
+                {I}var error in {verify_method}({verify_item_expr}))"""
             )
 
         stmts.append(
@@ -894,8 +918,17 @@ int {index_var} = 0;
             item_expr = f"{source_expr}.Item{i + 1}"
             verify_method = _generate_verify_method(our_type=item_type_anno.our_type)
 
+            # NOTE (mristin):
+            # A named union is not itself an ``Aas.IClass``, so we verify its
+            # underlying instance instead of ``item_expr`` directly.
+            verify_item_expr = (
+                Stripped(f"{item_expr}.Underlying")
+                if isinstance(item_type_anno.our_type, intermediate.NamedUnion)
+                else Stripped(item_expr)
+            )
+
             foreach_error_in_verify = (
-                f"foreach (var error in {verify_method}({item_expr}))"
+                f"foreach (var error in {verify_method}({verify_item_expr}))"
             )
             # Heuristic to break the lines, very rudimentary
             if len(foreach_error_in_verify) > 80:
@@ -903,7 +936,7 @@ int {index_var} = 0;
                     f"""\
                     foreach (
                         {I}var error in {verify_method}(
-                        {II}{item_expr}))"""
+                        {II}{verify_item_expr}))"""
                 )
 
             # We can't use textwrap.dedent due to foreach_snippet.
@@ -1112,6 +1145,13 @@ def _generate_transformer(
                 else:
                     assert block is not None
                     blocks.append(block)
+
+        elif isinstance(our_type, intermediate.NamedUnion):
+            # A named union has no verify-transform method of its own --
+            # verifying a union-typed value means verifying its underlying
+            # instance, handled at each property/list-item/tuple-item call site.
+            pass
+
         else:
             assert_never(our_type)
 
@@ -1399,6 +1439,12 @@ public static IEnumerable<Reporting.Error> Verify(Aas.IClass that)
         ):
             # We provide a general dispatch function.
             pass
+
+        elif isinstance(our_type, intermediate.NamedUnion):
+            # A named union has no invariants of its own -- it is verified
+            # through the same general dispatch function as a class.
+            pass
+
         else:
             assert_never(our_type)
 
