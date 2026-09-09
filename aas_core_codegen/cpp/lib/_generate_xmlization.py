@@ -2450,8 +2450,8 @@ def _generate_deserialize_union_from_element_generic() -> Stripped:
     """
     Generate a generic function to de-serialize a named union from an element.
 
-    Mirrors :py:func:`_generate_deserialize_class_from_element_generic`, but
-    returns ``optional<VariantT>`` directly instead of
+    This mirrors :py:func:`_generate_deserialize_class_from_element_generic`,
+    but returns ``optional<VariantT>`` directly instead of
     ``optional<shared_ptr<T>>`` -- a named union is a ``std::variant``, not
     a polymorphic pointer, so there is no pointer to wrap. The dispatch
     lambda supplied by the caller is responsible for constructing the right
@@ -3729,12 +3729,13 @@ def _xml_deserialize_item_expr(
 
         elif isinstance(
             item_type_anno.our_type,
-            (
-                intermediate.AbstractClass,
-                intermediate.ConcreteClass,
-                intermediate.NamedUnion,
-            ),
+            (intermediate.AbstractClass, intermediate.ConcreteClass),
         ):
+            return cpp_naming.function_name(
+                Identifier(f"{item_type_anno.our_type.name}_from_element")
+            )
+
+        elif isinstance(item_type_anno.our_type, intermediate.NamedUnion):
             return cpp_naming.function_name(
                 Identifier(f"{item_type_anno.our_type.name}_from_element")
             )
@@ -5666,18 +5667,17 @@ def _xml_serialize_tuple_value_expr(
         # Both classes and named unions are self-tagging (dispatched through
         # their own element tag), unlike primitives/enumerations, which are
         # wrapped in a synthetic ``<v1>``, ``<v2>``, *etc.* element.
-        is_class_or_named_union_item = isinstance(
+        is_class_item = isinstance(
             item_type_anno, intermediate.OurTypeAnnotation
         ) and isinstance(
             item_type_anno.our_type,
-            (
-                intermediate.AbstractClass,
-                intermediate.ConcreteClass,
-                intermediate.NamedUnion,
-            ),
+            (intermediate.AbstractClass, intermediate.ConcreteClass),
         )
+        is_named_union_item = isinstance(
+            item_type_anno, intermediate.OurTypeAnnotation
+        ) and isinstance(item_type_anno.our_type, intermediate.NamedUnion)
 
-        if not is_class_or_named_union_item:
+        if not (is_class_item or is_named_union_item):
             if items_primitive_type is not None:
                 serialize_function = _PRIMITIVE_TYPE_TO_SERIALIZE[items_primitive_type]
             elif isinstance(item_type_anno, intermediate.PrimitiveTypeAnnotation):
@@ -6618,12 +6618,11 @@ def _type_annotation_contains_list_of_atomic_non_class_values(
 
             elif isinstance(
                 type_annotation.items.our_type,
-                (
-                    intermediate.AbstractClass,
-                    intermediate.ConcreteClass,
-                    intermediate.NamedUnion,
-                ),
+                (intermediate.AbstractClass, intermediate.ConcreteClass),
             ):
+                return False
+
+            elif isinstance(type_annotation.items.our_type, intermediate.NamedUnion):
                 return False
 
             else:
@@ -6696,12 +6695,11 @@ def _type_annotation_contains_list_of_instances(
 
             elif isinstance(
                 type_annotation.items.our_type,
-                (
-                    intermediate.AbstractClass,
-                    intermediate.ConcreteClass,
-                    intermediate.NamedUnion,
-                ),
+                (intermediate.AbstractClass, intermediate.ConcreteClass),
             ):
+                return True
+
+            elif isinstance(type_annotation.items.our_type, intermediate.NamedUnion):
                 return True
 
             else:

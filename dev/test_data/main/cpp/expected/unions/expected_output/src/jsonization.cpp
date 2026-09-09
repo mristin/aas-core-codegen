@@ -4978,9 +4978,9 @@ std::pair<
 ) {
   switch (that.index()) {
     case 0:
-      return SerializeIClassPtr(std::get<0>(that));
+      return SerializeStructuralFirst(*std::get<0>(that));
     case 1:
-      return SerializeIClassPtr(std::get<1>(that));
+      return SerializeStructuralSecond(*std::get<1>(that));
     default:
       throw std::logic_error(
         common::Concat(
@@ -4999,15 +4999,15 @@ std::pair<
 ) {
   switch (that.index()) {
     case 0:
-      return SerializeIClassPtr(std::get<0>(that));
+      return SerializeMixedAbstractDescendantOne(*std::get<0>(that));
     case 1:
-      return SerializeIClassPtr(std::get<1>(that));
+      return SerializeMixedAbstractDescendantTwo(*std::get<1>(that));
     case 2:
-      return SerializeIClassPtr(std::get<2>(that));
+      return SerializeMixedConcreteWithDescendantsChild(*std::get<2>(that));
     case 3:
-      return SerializeIClassPtr(std::get<3>(that));
+      return SerializeMixedConcreteWithDescendants(*std::get<3>(that));
     case 4:
-      return SerializeIClassPtr(std::get<4>(that));
+      return SerializeMixedConcreteLeaf(*std::get<4>(that));
     default:
       throw std::logic_error(
         common::Concat(
@@ -5026,9 +5026,9 @@ std::pair<
 ) {
   switch (that.index()) {
     case 0:
-      return SerializeIClassPtr(std::get<0>(that));
+      return SerializeModelTypedFirst(*std::get<0>(that));
     case 1:
-      return SerializeIClassPtr(std::get<1>(that));
+      return SerializeModelTypedSecond(*std::get<1>(that));
     default:
       throw std::logic_error(
         common::Concat(

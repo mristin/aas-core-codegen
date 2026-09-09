@@ -787,12 +787,11 @@ class IteratorQualities:
 
                 elif isinstance(
                     type_anno.our_type,
-                    (
-                        intermediate.AbstractClass,
-                        intermediate.ConcreteClass,
-                        intermediate.NamedUnion,
-                    ),
+                    (intermediate.AbstractClass, intermediate.ConcreteClass),
                 ):
+                    relevant_properties.append(prop)
+
+                elif isinstance(type_anno.our_type, intermediate.NamedUnion):
                     relevant_properties.append(prop)
 
                 else:
@@ -813,12 +812,13 @@ class IteratorQualities:
 
                     elif isinstance(
                         type_anno.items.our_type,
-                        (
-                            intermediate.AbstractClass,
-                            intermediate.ConcreteClass,
-                            intermediate.NamedUnion,
-                        ),
+                        (intermediate.AbstractClass, intermediate.ConcreteClass),
                     ):
+                        cls_contains_a_list_or_tuple_property = True
+
+                        relevant_properties.append(prop)
+
+                    elif isinstance(type_anno.items.our_type, intermediate.NamedUnion):
                         cls_contains_a_list_or_tuple_property = True
 
                         relevant_properties.append(prop)
@@ -846,16 +846,18 @@ class IteratorQualities:
                         "so no nested optionals, lists or tuples are expected here."
                     )
 
-                    if isinstance(
+                    is_class_item = isinstance(
                         item_type_anno, intermediate.OurTypeAnnotation
                     ) and isinstance(
                         item_type_anno.our_type,
-                        (
-                            intermediate.AbstractClass,
-                            intermediate.ConcreteClass,
-                            intermediate.NamedUnion,
-                        ),
-                    ):
+                        (intermediate.AbstractClass, intermediate.ConcreteClass),
+                    )
+
+                    is_named_union_item = isinstance(
+                        item_type_anno, intermediate.OurTypeAnnotation
+                    ) and isinstance(item_type_anno.our_type, intermediate.NamedUnion)
+
+                    if is_class_item or is_named_union_item:
                         contains_a_class = True
 
                 if contains_a_class:
@@ -970,9 +972,9 @@ def _generate_extract_iclass_from_named_union(
     so it can not be ``static_pointer_cast`` directly -- we switch on the
     variant's own ``index()`` and return the corresponding
     ``std::get<i>(...)`` alternative, which upcasts to ``IClass`` like any
-    other class pointer. Generated once per union and referenced by name
-    wherever a union-typed property/item is iterated (single property, list
-    item, tuple item).
+    other class pointer. We generate this once per union and reference it
+    by name wherever a union-typed property/item is iterated (single
+    property, list item, tuple item).
     """
     union_name = cpp_naming.union_name(named_union.name)
     function_name = _named_union_extraction_function_name(named_union)
@@ -1114,21 +1116,24 @@ item_ = std::move(
                 flow.append(yielding_flow.Yield())
 
         elif isinstance(type_anno, intermediate.ListTypeAnnotation):
-            assert isinstance(
+            is_list_of_classes = isinstance(
                 type_anno.items, intermediate.OurTypeAnnotation
             ) and isinstance(
                 type_anno.items.our_type,
-                (
-                    intermediate.AbstractClass,
-                    intermediate.ConcreteClass,
-                    intermediate.NamedUnion,
-                ),
-            ), (
-                f"NOTE (mristin): We expect only lists of classes "
-                f"at the moment, but you specified {prop.type_annotation} "
+                (intermediate.AbstractClass, intermediate.ConcreteClass),
+            )
+
+            is_list_of_named_unions = isinstance(
+                type_anno.items, intermediate.OurTypeAnnotation
+            ) and isinstance(type_anno.items.our_type, intermediate.NamedUnion)
+
+            assert is_list_of_classes or is_list_of_named_unions, (
+                f"NOTE (mristin): We expect only lists of classes or named "
+                f"unions at the moment, but you specified {prop.type_annotation} "
                 f"in class {cls.name!r} and property {prop.name!r}. "
                 f"Please contact the developers if you need this feature."
             )
+            assert isinstance(type_anno.items, intermediate.OurTypeAnnotation)
 
             if isinstance(type_anno.items.our_type, intermediate.NamedUnion):
                 extraction_function = _named_union_extraction_function_name(
@@ -1215,19 +1220,22 @@ item_ = std::move(
                 flow.append(yielding_flow.command_from_text("cursor_.reset();"))
 
         elif isinstance(type_anno, intermediate.TupleTypeAnnotation):
-            class_or_union_indices = [
-                (i, item_type_anno.our_type)
-                for i, item_type_anno in enumerate(type_anno.items)
-                if isinstance(item_type_anno, intermediate.OurTypeAnnotation)
-                and isinstance(
+            class_or_union_indices = []  # type: List[Tuple[int, intermediate.OurType]]
+            for i, item_type_anno in enumerate(type_anno.items):
+                if not isinstance(item_type_anno, intermediate.OurTypeAnnotation):
+                    continue
+
+                is_class_item = isinstance(
                     item_type_anno.our_type,
-                    (
-                        intermediate.AbstractClass,
-                        intermediate.ConcreteClass,
-                        intermediate.NamedUnion,
-                    ),
+                    (intermediate.AbstractClass, intermediate.ConcreteClass),
                 )
-            ]
+                is_named_union_item = isinstance(
+                    item_type_anno.our_type, intermediate.NamedUnion
+                )
+
+                if is_class_item or is_named_union_item:
+                    class_or_union_indices.append((i, item_type_anno.our_type))
+
             assert len(class_or_union_indices) > 0, (
                 "Expected at least one class item in the tuple as the property "
                 "has been recognized as relevant in ``IteratorQualities``"

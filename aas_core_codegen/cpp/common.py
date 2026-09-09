@@ -574,12 +574,11 @@ def is_referencable(type_annotation: intermediate.TypeAnnotationUnion) -> bool:
 
             elif isinstance(
                 type_annotation.our_type,
-                (
-                    intermediate.AbstractClass,
-                    intermediate.ConcreteClass,
-                    intermediate.NamedUnion,
-                ),
+                (intermediate.AbstractClass, intermediate.ConcreteClass),
             ):
+                return True
+
+            elif isinstance(type_annotation.our_type, intermediate.NamedUnion):
                 return True
 
             else:

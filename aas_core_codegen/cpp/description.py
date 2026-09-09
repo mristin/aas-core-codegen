@@ -213,19 +213,22 @@ class _ElementRenderer(intermediate_doc.DocutilsElementTransformer[str]):
             else:
                 result = f"{cpp_common.TYPES_NAMESPACE}::{name}"
 
+        elif isinstance(element.our_type, intermediate.NamedUnion):
+            # NOTE (mristin):
+            # A named union is declared as a real ``using`` alias in
+            # types.hpp (see ``_generate_types.py``), so, unlike a
+            # constrained primitive, it has an actual symbol to refer to.
+            union_name = cpp_naming.union_name(element.our_type.name)
+
+            if self.context.namespace == cpp_common.TYPES_NAMESPACE:
+                result = f"{union_name}"
+            else:
+                result = f"{cpp_common.TYPES_NAMESPACE}::{union_name}"
+
         elif isinstance(element.our_type, intermediate.ConstrainedPrimitive):
             # NOTE (mristin):
             # We do not generate a class for constrained primitives, but we
             # leave it here as a literal.
-
-            name = cpp_naming.class_name(element.our_type.name)
-            result = f"`{name}`"
-
-        elif isinstance(element.our_type, intermediate.NamedUnion):
-            # NOTE (mristin):
-            # A named union has no C++ type declaration of its own -- it is
-            # always inlined as a ``std::variant`` -- so we leave it here as
-            # a literal, mirroring how a constrained primitive is referenced.
 
             name = cpp_naming.class_name(element.our_type.name)
             result = f"`{name}`"
