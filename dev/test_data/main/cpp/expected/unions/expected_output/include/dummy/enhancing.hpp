@@ -177,6 +177,36 @@ std::shared_ptr<
   >& factory
 );
 
+template <typename E>
+types::StructuralUnion Wrap(
+  const types::StructuralUnion& that,
+  const std::function<
+    std::shared_ptr<E>(
+      const std::shared_ptr<types::IClass>&
+    )
+  >& factory
+);
+
+template <typename E>
+types::MixedUnion Wrap(
+  const types::MixedUnion& that,
+  const std::function<
+    std::shared_ptr<E>(
+      const std::shared_ptr<types::IClass>&
+    )
+  >& factory
+);
+
+template <typename E>
+types::ModelTypedUnion Wrap(
+  const types::ModelTypedUnion& that,
+  const std::function<
+    std::shared_ptr<E>(
+      const std::shared_ptr<types::IClass>&
+    )
+  >& factory
+);
+
 // endregion Forward declarations
 
 /// \cond HIDDEN
@@ -1362,9 +1392,7 @@ std::shared_ptr<types::ISomething> WrapSomething(
       that->optional_structural_property().value()
     );
 
-    std::shared_ptr<
-      types::IStructuralUnion
-    > wrapped(
+    types::StructuralUnion wrapped(
       Wrap<E>(
         value,
         factory
@@ -1383,9 +1411,7 @@ std::shared_ptr<types::ISomething> WrapSomething(
       that->optional_mixed_property().value()
     );
 
-    std::shared_ptr<
-      types::IMixedUnion
-    > wrapped(
+    types::MixedUnion wrapped(
       Wrap<E>(
         value,
         factory
@@ -1404,9 +1430,7 @@ std::shared_ptr<types::ISomething> WrapSomething(
       that->optional_model_typed_property().value()
     );
 
-    std::shared_ptr<
-      types::IModelTypedUnion
-    > wrapped(
+    types::ModelTypedUnion wrapped(
       Wrap<E>(
         value,
         factory
@@ -2055,6 +2079,114 @@ std::shared_ptr<
         )
       );
       break;
+  }
+}
+
+template <typename E>
+types::StructuralUnion Wrap(
+  const types::StructuralUnion& that,
+  const std::function<
+    std::shared_ptr<E>(
+      const std::shared_ptr<types::IClass>&
+    )
+  >& factory
+) {
+  switch (that.index()) {
+    case 0:
+      return types::StructuralUnion(
+        Wrap<E>(
+          std::get<0>(that),
+          factory
+        )
+      );
+    case 1:
+      return types::StructuralUnion(
+        Wrap<E>(
+          std::get<1>(that),
+          factory
+        )
+      );
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
+}
+
+template <typename E>
+types::MixedUnion Wrap(
+  const types::MixedUnion& that,
+  const std::function<
+    std::shared_ptr<E>(
+      const std::shared_ptr<types::IClass>&
+    )
+  >& factory
+) {
+  switch (that.index()) {
+    case 0:
+      return types::MixedUnion(
+        Wrap<E>(
+          std::get<0>(that),
+          factory
+        )
+      );
+    case 1:
+      return types::MixedUnion(
+        Wrap<E>(
+          std::get<1>(that),
+          factory
+        )
+      );
+    case 2:
+      return types::MixedUnion(
+        Wrap<E>(
+          std::get<2>(that),
+          factory
+        )
+      );
+    case 3:
+      return types::MixedUnion(
+        Wrap<E>(
+          std::get<3>(that),
+          factory
+        )
+      );
+    case 4:
+      return types::MixedUnion(
+        Wrap<E>(
+          std::get<4>(that),
+          factory
+        )
+      );
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
+}
+
+template <typename E>
+types::ModelTypedUnion Wrap(
+  const types::ModelTypedUnion& that,
+  const std::function<
+    std::shared_ptr<E>(
+      const std::shared_ptr<types::IClass>&
+    )
+  >& factory
+) {
+  switch (that.index()) {
+    case 0:
+      return types::ModelTypedUnion(
+        Wrap<E>(
+          std::get<0>(that),
+          factory
+        )
+      );
+    case 1:
+      return types::ModelTypedUnion(
+        Wrap<E>(
+          std::get<1>(that),
+          factory
+        )
+      );
+    default:
+      throw std::logic_error("Invalid variant index");
   }
 }
 

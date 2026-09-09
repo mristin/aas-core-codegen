@@ -1,0 +1,4 @@
+This directory is intentionally empty: the ``unions.py`` common meta-model
+declares no invariants (``@invariant``), so there are no constraint-violation
+("Invalid") examples to add. The directory must still exist so that the
+generated C++ test harness's directory listing does not fail.

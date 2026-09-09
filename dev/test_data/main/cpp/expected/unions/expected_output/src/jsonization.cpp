@@ -1917,9 +1917,7 @@ std::pair<
 
   switch (*model_type) {
     case types::ModelType::kMixedConcreteWithDescendants:
-      return ConcretelyDeserializeMixedConcreteWithDescendants<
-        types::IMixedConcreteWithDescendants
-      >(json, additional_properties);
+      return ConcretelyDeserializeMixedConcreteWithDescendants(json, additional_properties);
     case types::ModelType::kMixedConcreteWithDescendantsChild:
       return DeserializeMixedConcreteWithDescendantsChild<
         types::IMixedConcreteWithDescendants
@@ -4367,6 +4365,27 @@ std::pair<
   common::optional<SerializationError>
 > SerializeIClassPtr(
   const std::shared_ptr<types::IClass>& that
+);
+
+std::pair<
+  common::optional<nlohmann::json>,
+  common::optional<SerializationError>
+> SerializeStructuralUnion(
+  const types::StructuralUnion& that
+);
+
+std::pair<
+  common::optional<nlohmann::json>,
+  common::optional<SerializationError>
+> SerializeMixedUnion(
+  const types::MixedUnion& that
+);
+
+std::pair<
+  common::optional<nlohmann::json>,
+  common::optional<SerializationError>
+> SerializeModelTypedUnion(
+  const types::ModelTypedUnion& that
 );
 
 std::pair<

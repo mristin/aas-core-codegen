@@ -1103,6 +1103,21 @@ class IClass {{
         )
     )
 
+    if len(symbol_table.named_unions) > 0:
+        # NOTE (mristin):
+        # A named union's ``using`` alias must be declared before any class
+        # interface that references it as a property type, since (unlike a
+        # class) it can not be forward-declared -- it only needs its
+        # implementers' interfaces forward-declared (already true at this
+        # point), so it is safe to place it right after ``IClass`` and
+        # before any class interface is defined.
+        blocks.append(Stripped("// region Named unions"))
+
+        for named_union in symbol_table.named_unions:
+            blocks.append(_generate_named_union_alias(named_union=named_union))
+
+        blocks.append(Stripped("// endregion"))
+
     for cls in symbol_table.classes:
         block, error = _generate_class_interface(cls=cls)
         if error is not None:
@@ -1112,14 +1127,6 @@ class IClass {{
             blocks.append(block)
 
     blocks.append(Stripped("// endregion"))
-
-    if len(symbol_table.named_unions) > 0:
-        blocks.append(Stripped("// region Named unions"))
-
-        for named_union in symbol_table.named_unions:
-            blocks.append(_generate_named_union_alias(named_union=named_union))
-
-        blocks.append(Stripped("// endregion"))
 
     blocks.append(Stripped("// region Definitions of concrete classes"))
 

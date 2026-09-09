@@ -1,8 +1,7 @@
 """Generate code for XML de/serialization."""
 
 import io
-import itertools
-from typing import List, Tuple, Optional, Sequence, Final, Mapping, Union
+from typing import List, Tuple, Optional, Sequence, Final, Mapping
 
 from icontract import ensure, require
 
@@ -5601,7 +5600,9 @@ def _xml_serialize_list_value_expr(
                 # value is already a ``std::variant``, not a pointer -- so we
                 # reference its ``*AsElement`` function directly.
                 serialize_item = cpp_naming.function_name(
-                    Identifier(f"serialize_{item_type_annotation.our_type.name}_as_element")
+                    Identifier(
+                        f"serialize_{item_type_annotation.our_type.name}_as_element"
+                    )
                 )
                 list_helper = "SerializeListOfInstances"
 

@@ -170,26 +170,117 @@ void PassThroughVisitor::VisitSomething(
   const std::shared_ptr<types::ISomething>& that
 ) {
   // mutable_structural_property
-  Visit(
-    that->mutable_structural_property()
-  );
+  switch (
+    (that->mutable_structural_property()).index()
+  ) {
+    case 0:
+      Visit(
+        std::get<0>(
+          that->mutable_structural_property()
+        )
+      );
+      break;
+    case 1:
+      Visit(
+        std::get<1>(
+          that->mutable_structural_property()
+        )
+      );
+      break;
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
 
   // mutable_mixed_property
-  Visit(
-    that->mutable_mixed_property()
-  );
+  switch (
+    (that->mutable_mixed_property()).index()
+  ) {
+    case 0:
+      Visit(
+        std::get<0>(
+          that->mutable_mixed_property()
+        )
+      );
+      break;
+    case 1:
+      Visit(
+        std::get<1>(
+          that->mutable_mixed_property()
+        )
+      );
+      break;
+    case 2:
+      Visit(
+        std::get<2>(
+          that->mutable_mixed_property()
+        )
+      );
+      break;
+    case 3:
+      Visit(
+        std::get<3>(
+          that->mutable_mixed_property()
+        )
+      );
+      break;
+    case 4:
+      Visit(
+        std::get<4>(
+          that->mutable_mixed_property()
+        )
+      );
+      break;
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
 
   // mutable_model_typed_property
-  Visit(
-    that->mutable_model_typed_property()
-  );
+  switch (
+    (that->mutable_model_typed_property()).index()
+  ) {
+    case 0:
+      Visit(
+        std::get<0>(
+          that->mutable_model_typed_property()
+        )
+      );
+      break;
+    case 1:
+      Visit(
+        std::get<1>(
+          that->mutable_model_typed_property()
+        )
+      );
+      break;
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
 
   // mutable_list_structural_property
   for (
     const types::StructuralUnion& item :
     that->mutable_list_structural_property()
   ) {
-    Visit(item);
+    switch (
+      (item).index()
+    ) {
+      case 0:
+        Visit(
+          std::get<0>(
+            item
+          )
+        );
+        break;
+      case 1:
+        Visit(
+          std::get<1>(
+            item
+          )
+        );
+        break;
+      default:
+        throw std::logic_error("Invalid variant index");
+    }
   }
 
   // mutable_list_mixed_property
@@ -197,7 +288,47 @@ void PassThroughVisitor::VisitSomething(
     const types::MixedUnion& item :
     that->mutable_list_mixed_property()
   ) {
-    Visit(item);
+    switch (
+      (item).index()
+    ) {
+      case 0:
+        Visit(
+          std::get<0>(
+            item
+          )
+        );
+        break;
+      case 1:
+        Visit(
+          std::get<1>(
+            item
+          )
+        );
+        break;
+      case 2:
+        Visit(
+          std::get<2>(
+            item
+          )
+        );
+        break;
+      case 3:
+        Visit(
+          std::get<3>(
+            item
+          )
+        );
+        break;
+      case 4:
+        Visit(
+          std::get<4>(
+            item
+          )
+        );
+        break;
+      default:
+        throw std::logic_error("Invalid variant index");
+    }
   }
 
   // mutable_list_model_typed_property
@@ -205,34 +336,160 @@ void PassThroughVisitor::VisitSomething(
     const types::ModelTypedUnion& item :
     that->mutable_list_model_typed_property()
   ) {
-    Visit(item);
+    switch (
+      (item).index()
+    ) {
+      case 0:
+        Visit(
+          std::get<0>(
+            item
+          )
+        );
+        break;
+      case 1:
+        Visit(
+          std::get<1>(
+            item
+          )
+        );
+        break;
+      default:
+        throw std::logic_error("Invalid variant index");
+    }
   }
 
   // mutable_tuple_property
-  Visit(
-    std::get<0>(
+  switch (
+    (std::get<0>(
       that->mutable_tuple_property()
-    )
-  );
-  Visit(
-    std::get<1>(
+    )).index()
+  ) {
+    case 0:
+      Visit(
+        std::get<0>(
+          std::get<0>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    case 1:
+      Visit(
+        std::get<1>(
+          std::get<0>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
+  switch (
+    (std::get<1>(
       that->mutable_tuple_property()
-    )
-  );
-  Visit(
-    std::get<2>(
+    )).index()
+  ) {
+    case 0:
+      Visit(
+        std::get<0>(
+          std::get<1>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    case 1:
+      Visit(
+        std::get<1>(
+          std::get<1>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    case 2:
+      Visit(
+        std::get<2>(
+          std::get<1>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    case 3:
+      Visit(
+        std::get<3>(
+          std::get<1>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    case 4:
+      Visit(
+        std::get<4>(
+          std::get<1>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
+  switch (
+    (std::get<2>(
       that->mutable_tuple_property()
-    )
-  );
+    )).index()
+  ) {
+    case 0:
+      Visit(
+        std::get<0>(
+          std::get<2>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    case 1:
+      Visit(
+        std::get<1>(
+          std::get<2>(
+            that->mutable_tuple_property()
+          )
+        )
+      );
+      break;
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
 
   // region mutable_optional_structural_property
   const common::optional<types::StructuralUnion>& maybe_optional_structural_property(
     that->mutable_optional_structural_property()
   );
   if (maybe_optional_structural_property.has_value()) {
-    Visit(
-      maybe_optional_structural_property.value()
-    );
+    switch (
+      (maybe_optional_structural_property.value()).index()
+    ) {
+      case 0:
+        Visit(
+          std::get<0>(
+            maybe_optional_structural_property.value()
+          )
+        );
+        break;
+      case 1:
+        Visit(
+          std::get<1>(
+            maybe_optional_structural_property.value()
+          )
+        );
+        break;
+      default:
+        throw std::logic_error("Invalid variant index");
+    }
   }
   // endregion
 
@@ -241,9 +498,47 @@ void PassThroughVisitor::VisitSomething(
     that->mutable_optional_mixed_property()
   );
   if (maybe_optional_mixed_property.has_value()) {
-    Visit(
-      maybe_optional_mixed_property.value()
-    );
+    switch (
+      (maybe_optional_mixed_property.value()).index()
+    ) {
+      case 0:
+        Visit(
+          std::get<0>(
+            maybe_optional_mixed_property.value()
+          )
+        );
+        break;
+      case 1:
+        Visit(
+          std::get<1>(
+            maybe_optional_mixed_property.value()
+          )
+        );
+        break;
+      case 2:
+        Visit(
+          std::get<2>(
+            maybe_optional_mixed_property.value()
+          )
+        );
+        break;
+      case 3:
+        Visit(
+          std::get<3>(
+            maybe_optional_mixed_property.value()
+          )
+        );
+        break;
+      case 4:
+        Visit(
+          std::get<4>(
+            maybe_optional_mixed_property.value()
+          )
+        );
+        break;
+      default:
+        throw std::logic_error("Invalid variant index");
+    }
   }
   // endregion
 
@@ -252,9 +547,26 @@ void PassThroughVisitor::VisitSomething(
     that->mutable_optional_model_typed_property()
   );
   if (maybe_optional_model_typed_property.has_value()) {
-    Visit(
-      maybe_optional_model_typed_property.value()
-    );
+    switch (
+      (maybe_optional_model_typed_property.value()).index()
+    ) {
+      case 0:
+        Visit(
+          std::get<0>(
+            maybe_optional_model_typed_property.value()
+          )
+        );
+        break;
+      case 1:
+        Visit(
+          std::get<1>(
+            maybe_optional_model_typed_property.value()
+          )
+        );
+        break;
+      default:
+        throw std::logic_error("Invalid variant index");
+    }
   }
   // endregion
 }

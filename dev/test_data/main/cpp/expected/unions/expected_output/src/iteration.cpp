@@ -166,6 +166,51 @@ std::wstring Path::ToWstring() const {
 
 // region Non-recursive iteration
 
+std::shared_ptr<types::IClass> ExtractIClassFromStructuralUnion(
+  const types::StructuralUnion& that
+) {
+  switch (that.index()) {
+    case 0:
+      return std::get<0>(that);
+    case 1:
+      return std::get<1>(that);
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
+}
+
+std::shared_ptr<types::IClass> ExtractIClassFromMixedUnion(
+  const types::MixedUnion& that
+) {
+  switch (that.index()) {
+    case 0:
+      return std::get<0>(that);
+    case 1:
+      return std::get<1>(that);
+    case 2:
+      return std::get<2>(that);
+    case 3:
+      return std::get<3>(that);
+    case 4:
+      return std::get<4>(that);
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
+}
+
+std::shared_ptr<types::IClass> ExtractIClassFromModelTypedUnion(
+  const types::ModelTypedUnion& that
+) {
+  switch (that.index()) {
+    case 0:
+      return std::get<0>(that);
+    case 1:
+      return std::get<1>(that);
+    default:
+      throw std::logic_error("Invalid variant index");
+  }
+}
+
 /**
  * This iterator is always done as IStructuralFirst
  * references no other instances.
@@ -847,7 +892,7 @@ void IteratorOverSomething::Execute() {
 
         property_ = Property::kStructuralProperty;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromStructuralUnion(
             casted_->structural_property()
           )
         );
@@ -860,7 +905,7 @@ void IteratorOverSomething::Execute() {
       case 1: {
         property_ = Property::kMixedProperty;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromMixedUnion(
             casted_->mixed_property()
           )
         );
@@ -873,7 +918,7 @@ void IteratorOverSomething::Execute() {
       case 2: {
         property_ = Property::kModelTypedProperty;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromModelTypedUnion(
             casted_->model_typed_property()
           )
         );
@@ -900,11 +945,10 @@ void IteratorOverSomething::Execute() {
         const std::vector<types::StructuralUnion>& the_list_structural_property(
           casted_->list_structural_property()
         );
+        const auto& item_value = the_list_structural_property[*cursor_];
 
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
-            the_list_structural_property[*cursor_]
-          )
+          ExtractIClassFromStructuralUnion(item_value)
         );
         ++index_;
 
@@ -936,11 +980,10 @@ void IteratorOverSomething::Execute() {
         const std::vector<types::MixedUnion>& the_list_mixed_property(
           casted_->list_mixed_property()
         );
+        const auto& item_value = the_list_mixed_property[*cursor_];
 
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
-            the_list_mixed_property[*cursor_]
-          )
+          ExtractIClassFromMixedUnion(item_value)
         );
         ++index_;
 
@@ -974,11 +1017,10 @@ void IteratorOverSomething::Execute() {
         const std::vector<types::ModelTypedUnion>& the_list_model_typed_property(
           casted_->list_model_typed_property()
         );
+        const auto& item_value = the_list_model_typed_property[*cursor_];
 
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
-            the_list_model_typed_property[*cursor_]
-          )
+          ExtractIClassFromModelTypedUnion(item_value)
         );
         ++index_;
 
@@ -1000,7 +1042,7 @@ void IteratorOverSomething::Execute() {
 
         cursor_ = 0;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromStructuralUnion(
             std::get<0>(casted_->tuple_property())
           )
         );
@@ -1013,7 +1055,7 @@ void IteratorOverSomething::Execute() {
       case 13: {
         cursor_ = 1;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromMixedUnion(
             std::get<1>(casted_->tuple_property())
           )
         );
@@ -1026,7 +1068,7 @@ void IteratorOverSomething::Execute() {
       case 14: {
         cursor_ = 2;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromModelTypedUnion(
             std::get<2>(casted_->tuple_property())
           )
         );
@@ -1048,7 +1090,7 @@ void IteratorOverSomething::Execute() {
 
         property_ = Property::kOptionalStructuralProperty;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromStructuralUnion(
             *(casted_->optional_structural_property())
           )
         );
@@ -1066,7 +1108,7 @@ void IteratorOverSomething::Execute() {
 
         property_ = Property::kOptionalMixedProperty;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromMixedUnion(
             *(casted_->optional_mixed_property())
           )
         );
@@ -1086,7 +1128,7 @@ void IteratorOverSomething::Execute() {
 
         property_ = Property::kOptionalModelTypedProperty;
         item_ = std::move(
-          std::static_pointer_cast<types::IClass>(
+          ExtractIClassFromModelTypedUnion(
             *(casted_->optional_model_typed_property())
           )
         );

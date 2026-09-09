@@ -85,6 +85,37 @@ class IClass {
   virtual ~IClass() = default;
 };
 
+// region Named unions
+
+/**
+ * Represent a union of classes.
+ */
+using StructuralUnion = std::variant<
+    std::shared_ptr<IStructuralFirst>,
+    std::shared_ptr<IStructuralSecond>
+  >;
+
+/**
+ * Represent a union of classes.
+ */
+using MixedUnion = std::variant<
+    std::shared_ptr<IMixedAbstractDescendantOne>,
+    std::shared_ptr<IMixedAbstractDescendantTwo>,
+    std::shared_ptr<IMixedConcreteWithDescendantsChild>,
+    std::shared_ptr<IMixedConcreteWithDescendants>,
+    std::shared_ptr<IMixedConcreteLeaf>
+  >;
+
+/**
+ * Represent a union of classes.
+ */
+using ModelTypedUnion = std::variant<
+    std::shared_ptr<IModelTypedFirst>,
+    std::shared_ptr<IModelTypedSecond>
+  >;
+
+// endregion
+
 class IStructuralFirst
     : virtual public IClass {
  public:
@@ -314,37 +345,6 @@ class ISomething
 
   virtual ~ISomething() = default;
 };
-
-// endregion
-
-// region Named unions
-
-/**
- * Represent a union of classes.
- */
-using StructuralUnion = std::variant<
-    std::shared_ptr<IStructuralFirst>,
-    std::shared_ptr<IStructuralSecond>
-  >;
-
-/**
- * Represent a union of classes.
- */
-using MixedUnion = std::variant<
-    std::shared_ptr<IMixedAbstractDescendantOne>,
-    std::shared_ptr<IMixedAbstractDescendantTwo>,
-    std::shared_ptr<IMixedConcreteWithDescendantsChild>,
-    std::shared_ptr<IMixedConcreteWithDescendants>,
-    std::shared_ptr<IMixedConcreteLeaf>
-  >;
-
-/**
- * Represent a union of classes.
- */
-using ModelTypedUnion = std::variant<
-    std::shared_ptr<IModelTypedFirst>,
-    std::shared_ptr<IModelTypedSecond>
-  >;
 
 // endregion
 
