@@ -234,6 +234,29 @@ that.{prop_setter_name}(
 )"""
                 )
 
+            elif isinstance(type_anno.our_type, intermediate.NamedUnion):
+                # NOTE (mristin):
+                # A named union is not itself an ``aastypes.IClass``, so we
+                # recurse into the underlying instance and re-wrap the
+                # result. We keep this as its own branch, separate from the
+                # class branch above, so that it can diverge independently,
+                # *e.g.*, if primitive alternatives are ever allowed into
+                # a named union.
+                from_underlying_name = golang_naming.function_name(
+                    Identifier(f"{type_anno.our_type.name}_from_underlying")
+                )
+                recurse_block = Stripped(
+                    f"""\
+that.{prop_setter_name}(
+{I}aastypes.{from_underlying_name}(
+{II}Wrap[E](
+{III}{prop_var}.Underlying(),
+{III}factory,
+{II}),
+{I}),
+)"""
+                )
+
             else:
                 # noinspection PyTypeChecker
                 assert_never(type_anno.our_type)
@@ -273,6 +296,31 @@ for i, v := range {prop_var} {{
 }}"""
                     )
 
+                elif isinstance(type_anno.items.our_type, intermediate.NamedUnion):
+                    # NOTE (mristin):
+                    # A named union is not itself an ``aastypes.IClass``, so
+                    # we recurse into the underlying instance and re-wrap the
+                    # result. We keep this as its own branch, separate from
+                    # the class branch above, so that it can diverge
+                    # independently, *e.g.*, if primitive alternatives are
+                    # ever allowed into a named union.
+                    from_underlying_name = golang_naming.function_name(
+                        Identifier(f"{type_anno.items.our_type.name}_from_underlying")
+                    )
+
+                    recurse_block = Stripped(
+                        f"""\
+for i, v := range {prop_var} {{
+{I}// Update in-situ
+{I}{prop_var}[i] = aastypes.{from_underlying_name}(
+{II}Wrap[E](
+{III}v.Underlying(),
+{III}factory,
+{II}),
+{I})
+}}"""
+                    )
+
                 else:
                     assert_never(type_anno.items.our_type)
 
@@ -306,28 +354,53 @@ for i, v := range {prop_var} {{
         elif isinstance(type_anno, intermediate.TupleTypeAnnotation):
             item_assignments = []  # type: List[Stripped]
             for i, item_type_anno in enumerate(type_anno.items):
-                if not (
-                    isinstance(item_type_anno, intermediate.OurTypeAnnotation)
-                    and isinstance(
-                        item_type_anno.our_type,
-                        (intermediate.AbstractClass, intermediate.ConcreteClass),
-                    )
-                ):
+                if not isinstance(item_type_anno, intermediate.OurTypeAnnotation):
                     continue
 
-                item_interface_name = golang_naming.interface_name(
-                    item_type_anno.our_type.name
-                )
+                if isinstance(
+                    item_type_anno.our_type,
+                    (intermediate.AbstractClass, intermediate.ConcreteClass),
+                ):
+                    item_interface_name = golang_naming.interface_name(
+                        item_type_anno.our_type.name
+                    )
 
-                item_assignments.append(
-                    Stripped(
-                        f"""\
+                    item_assignments.append(
+                        Stripped(
+                            f"""\
 {prop_var}.Item{i + 1} = Wrap[E](
 {I}{prop_var}.Item{i + 1},
 {I}factory,
 ).(aastypes.{item_interface_name})"""
+                        )
                     )
-                )
+
+                elif isinstance(item_type_anno.our_type, intermediate.NamedUnion):
+                    # NOTE (mristin):
+                    # A named union is not itself an ``aastypes.IClass``, so
+                    # we recurse into the underlying instance and re-wrap the
+                    # result. We keep this as its own branch, separate from
+                    # the class branch above, so that it can diverge
+                    # independently, *e.g.*, if primitive alternatives are
+                    # ever allowed into a named union.
+                    from_underlying_name = golang_naming.function_name(
+                        Identifier(f"{item_type_anno.our_type.name}_from_underlying")
+                    )
+
+                    item_assignments.append(
+                        Stripped(
+                            f"""\
+{prop_var}.Item{i + 1} = aastypes.{from_underlying_name}(
+{I}Wrap[E](
+{II}{prop_var}.Item{i + 1}.Underlying(),
+{II}factory,
+{I}),
+)"""
+                        )
+                    )
+
+                else:
+                    continue
 
             if len(item_assignments) == 0:
                 continue

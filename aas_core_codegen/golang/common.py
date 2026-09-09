@@ -249,6 +249,22 @@ def generate_type(
 
             return Stripped(f"{types_package}.{interface_name}")
 
+        elif isinstance(our_type, intermediate.NamedUnion):
+            # NOTE (mristin):
+            # A named union is represented as a plain Golang struct, not an
+            # interface -- it is a closed set of alternatives, so there is no
+            # need to allow custom enhancements or wrappings the way we do for
+            # the classes.
+            union_name = golang_naming.struct_name(our_type.name)
+
+            if types_package is None:
+                return Stripped(f"*{union_name}")
+
+            return Stripped(f"*{types_package}.{union_name}")
+
+        else:
+            assert_never(our_type)
+
     elif isinstance(type_annotation, intermediate.ListTypeAnnotation):
         item_type = generate_type(
             type_annotation=type_annotation.items, types_package=types_package

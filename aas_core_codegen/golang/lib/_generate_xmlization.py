@@ -785,7 +785,12 @@ def _generate_read_list_of_instances() -> Stripped:
 // stop the reading as soon as we encounter a non-start element.
 //
 // That last non-start element is returned as `next` element.
-func readListOfInstances[T aastypes.IClass](
+//
+// `T` is left unconstrained (instead of `aastypes.IClass`) since this
+// function never invokes any `aastypes.IClass` method on `T` -- this lets it
+// be reused for a list of a named union as well, which is deliberately not
+// an `aastypes.IClass` itself.
+func readListOfInstances[T any](
 {I}decoder *xml.Decoder,
 {I}current xml.Token,
 {I}readTWithLookahead func(
@@ -897,7 +902,12 @@ def _generate_as_instance_tuple_item_reader() -> Stripped:
 // `readTWithLookahead` is a distinct function value per class (there is no
 // single shared "read any instance" function to instantiate generically),
 // so it must be bound in via a closure, built once here.
-func asInstanceTupleItemReader[T aastypes.IClass](
+//
+// `T` is left unconstrained (instead of `aastypes.IClass`) since this
+// function never invokes any `aastypes.IClass` method on `T` -- this lets it
+// be reused for a named union tuple item as well, which is deliberately not
+// an `aastypes.IClass` itself.
+func asInstanceTupleItemReader[T any](
 {I}readTWithLookahead func(
 {II}aDecoder *xml.Decoder,
 {II}aCurrent xml.Token,
@@ -1174,6 +1184,33 @@ if valueErr == nil {{
                         )
                     )
 
+            elif isinstance(our_type, intermediate.NamedUnion):
+                # NOTE (mristin):
+                # A named union always takes the discriminator-nesting code
+                # path, exactly like a polymorphic class, so this branch
+                # mirrors the ``else`` branch above -- we keep it separate,
+                # as its own branch, so that it can diverge independently,
+                # *e.g.*, if primitive alternatives are ever allowed into
+                # a named union.
+                read_with_lookahead_function = golang_naming.private_function_name(
+                    Identifier(f"read_{type_anno.our_type.name}_with_lookahead")
+                )
+
+                case_body_blocks.append(
+                    Stripped(
+                        f"""\
+{prop_var}, valueErr =  {read_with_lookahead_function}(
+{I}decoder,
+{I}current,
+)
+// {read_with_lookahead_function} stops at the end element,
+// so we look ahead to the next element, just after the end element.
+if valueErr == nil {{
+{I}current, valueErr = readNext(decoder, current)
+}}"""
+                    )
+                )
+
             else:
                 assert_never(our_type)
 
@@ -1254,6 +1291,26 @@ if valueErr == nil {{
                             )
                         )
 
+                    elif isinstance(
+                        type_anno.items.our_type, intermediate.NamedUnion
+                    ):
+                        read_item_function = golang_naming.private_function_name(
+                            Identifier(
+                                f"read_{type_anno.items.our_type.name}_with_lookahead"
+                            )
+                        )
+
+                        case_body_blocks.append(
+                            Stripped(
+                                f"""\
+{prop_var}, current, valueErr = readListOfInstances(
+{I}decoder,
+{I}current,
+{I}{read_item_function},
+)"""
+                            )
+                        )
+
                     else:
                         # noinspection PyTypeChecker
                         assert_never(type_anno.items.our_type)
@@ -1273,6 +1330,28 @@ if valueErr == nil {{
                     item_type_anno.our_type,
                     (intermediate.AbstractClass, intermediate.ConcreteClass),
                 ):
+                    read_with_lookahead_function = golang_naming.private_function_name(
+                        Identifier(
+                            f"read_{item_type_anno.our_type.name}_with_lookahead"
+                        )
+                    )
+
+                    item_reader_exprs.append(
+                        Stripped(
+                            f"asInstanceTupleItemReader({read_with_lookahead_function}),"
+                        )
+                    )
+
+                elif isinstance(
+                    item_type_anno, intermediate.OurTypeAnnotation
+                ) and isinstance(item_type_anno.our_type, intermediate.NamedUnion):
+                    # NOTE (mristin):
+                    # A named union always takes the discriminator-nesting
+                    # code path, exactly like a polymorphic class, so this
+                    # branch mirrors the class branch above -- we keep it
+                    # separate, as its own branch, so that it can diverge
+                    # independently, *e.g.*, if primitive alternatives are
+                    # ever allowed into a named union.
                     read_with_lookahead_function = golang_naming.private_function_name(
                         Identifier(
                             f"read_{item_type_anno.our_type.name}_with_lookahead"
@@ -1780,6 +1859,121 @@ func {function_name}(
     )
 
 
+def _generate_read_with_lookahead_for_named_union(
+    named_union: intermediate.NamedUnion,
+) -> Stripped:
+    """
+    Generate the de-serialization function for the named union ``named_union``.
+
+    Unlike a class-typed property, a named-union-typed property always takes
+    the discriminator-nesting code path, so this dispatch is unconditional
+    and uniform, keyed by each implementer's own XML element name -- exactly
+    as for an abstract class with concrete descendants (see
+    :py:func:`_generate_read_with_lookahead_with_dispatch`), except that
+    every case additionally wraps the result into the union.
+    """
+    name = golang_naming.struct_name(named_union.name)
+    function_name = golang_naming.private_function_name(
+        Identifier(f"read_{named_union.name}_with_lookahead")
+    )
+
+    case_blocks = []  # type: List[Stripped]
+
+    for implementer in named_union.implementers:
+        xml_class_name_literal = golang_common.string_literal(
+            naming.xml_class_name(implementer.name)
+        )
+        read_as_sequence = golang_naming.private_function_name(
+            Identifier(f"read_{implementer.name}_as_sequence")
+        )
+        implementer_interface_name = golang_naming.interface_name(implementer.name)
+        from_method_name = golang_naming.function_name(
+            Identifier(f"new_{named_union.name}_from_{implementer.name}")
+        )
+
+        case_blocks.append(
+            Stripped(
+                f"""\
+case {xml_class_name_literal}:
+{I}var casted aastypes.{implementer_interface_name}
+{I}casted, current, err = {read_as_sequence}(
+{II}decoder, current,
+{I})
+{I}if err == nil {{
+{II}instance = aastypes.{from_method_name}(
+{III}casted,
+{II})
+{I}}}"""
+            )
+        )
+
+    case_blocks.append(
+        Stripped(
+            f"""\
+default:
+{I}err = newDeserializationError(
+{II}fmt.Sprintf(
+{III}"Unexpected start element %s as discriminator "+
+{IIII}"for the union {name}",
+{III}local,
+{II}),
+{I})"""
+        )
+    )
+
+    case_blocks_joined = "\n".join(case_blocks)
+
+    switch_stmt = Stripped(
+        f"""\
+switch local {{
+{case_blocks_joined}
+}}"""
+    )
+
+    return Stripped(
+        f"""\
+// De-serialize an instance of [aastypes.{name}]
+// as an XML element where the start element is expected to have been already read
+// as `current` token.
+//
+// The de-serialization stops by consuming the final end element. The next call to
+// the `decoder.Token()` will return the element just after the end element.
+func {function_name}(
+{I}decoder *xml.Decoder,
+{I}current xml.Token,
+) (instance *aastypes.{name},
+{I}err error,
+) {{
+{I}current, err = skipEmptyTextWhitespaceAndComments(decoder, current)
+{I}if err != nil {{
+{II}return
+{I}}}
+
+{I}var local string
+{I}local, err = parseAsStartElementAndExtractLocalName(
+{II}current,
+{I})
+{I}if err != nil {{
+{II}return
+{I}}}
+
+{I}// Move the current to the properties of the instance
+{I}current, err = readNext(decoder, current)
+{I}if err != nil {{
+{II}return
+{I}}}
+
+{I}{indent_but_first_line(switch_stmt, I)}
+{I}if err != nil {{
+{II}return
+{I}}}
+
+{I}err = checkEndElement(current, local)
+{I}return
+}}"""
+    )
+
+
 def _generate_unmarshal(symbol_table: intermediate.SymbolTable) -> Stripped:
     case_blocks = []  # type: List[Stripped]
     for cls in symbol_table.concrete_classes:
@@ -2199,6 +2393,30 @@ def _generate_as_instance_tuple_item_writer() -> Stripped:
 // Adapt `Marshal` into a tuple item writer for instances of `T`.
 func asInstanceTupleItemWriter[T aastypes.IClass](encoder *xml.Encoder, value T) error {{
 {I}return Marshal(encoder, value, false)
+}}"""
+    )
+
+
+def _generate_write_named_union_as_tuple_item(
+    named_union: intermediate.NamedUnion,
+) -> Stripped:
+    """
+    Generate the adapter so a union can be written as a tuple item writer.
+
+    `asInstanceTupleItemWriter` requires an `aastypes.IClass`, but a named
+    union is deliberately not one, so this small, dedicated, non-generic
+    adapter is generated once per union instead.
+    """
+    name = golang_naming.struct_name(named_union.name)
+    function_name = golang_naming.private_function_name(
+        Identifier(f"write_{named_union.name}_as_tuple_item")
+    )
+
+    return Stripped(
+        f"""\
+// Adapt `Marshal` into a tuple item writer for the union {name}.
+func {function_name}(encoder *xml.Encoder, value *aastypes.{name}) error {{
+{I}return Marshal(encoder, value.Underlying(), false)
 }}"""
     )
 
@@ -2633,6 +2851,23 @@ err = writeDiscriminatedInstanceProperty(
 {if_err_nil_prepend_name_if_serialization_error_return}"""
                 )
 
+        elif isinstance(our_type, intermediate.NamedUnion):
+            # NOTE (mristin):
+            # A named union always takes the discriminator-nesting code
+            # path, exactly like a polymorphic class, so this branch mirrors
+            # the polymorphic-class branch above -- we keep it separate, as
+            # its own branch, so that it can diverge independently, *e.g.*,
+            # if primitive alternatives are ever allowed into a named union.
+            write_block = Stripped(
+                f"""\
+err = writeDiscriminatedInstanceProperty(
+{I}encoder,
+{I}{local_literal},
+{I}{access_expr}.Underlying(),
+)
+{if_err_nil_prepend_name_if_serialization_error_return}"""
+            )
+
         else:
             assert_never(our_type)
 
@@ -2672,13 +2907,10 @@ err = writeListOfScalarsProperty(
 )
 {if_err_nil_prepend_name_if_serialization_error_return}"""
             )
-        else:
-            assert isinstance(type_anno.items, intermediate.OurTypeAnnotation)
-            assert isinstance(
-                type_anno.items.our_type,
-                (intermediate.AbstractClass, intermediate.ConcreteClass),
-            )
-
+        elif isinstance(type_anno.items, intermediate.OurTypeAnnotation) and isinstance(
+            type_anno.items.our_type,
+            (intermediate.AbstractClass, intermediate.ConcreteClass),
+        ):
             write_block = Stripped(
                 f"""\
 err = writeListOfInstancesProperty(
@@ -2687,6 +2919,37 @@ err = writeListOfInstancesProperty(
 {I}{access_expr},
 )
 {if_err_nil_prepend_name_if_serialization_error_return}"""
+            )
+
+        elif isinstance(type_anno.items, intermediate.OurTypeAnnotation) and isinstance(
+            type_anno.items.our_type, intermediate.NamedUnion
+        ):
+            # NOTE (mristin):
+            # ``writeListOfInstancesProperty`` writes each item via `Marshal`,
+            # which expects an `aastypes.IClass`, but a named union is
+            # deliberately not one -- so we first flatten the list into
+            # its items' underlying instances.
+            underlying_var = golang_naming.variable_name(
+                Identifier(f"{prop.name}_underlying")
+            )
+
+            write_block = Stripped(
+                f"""\
+{underlying_var} := make([]aastypes.IClass, len({access_expr}))
+for i, item := range {access_expr} {{
+{I}{underlying_var}[i] = item.Underlying()
+}}
+err = writeListOfInstancesProperty(
+{I}encoder,
+{I}{local_literal},
+{I}{underlying_var},
+)
+{if_err_nil_prepend_name_if_serialization_error_return}"""
+            )
+
+        else:
+            raise AssertionError(
+                f"Unexpected list item type annotation: {type_anno.items}"
             )
 
     elif isinstance(type_anno, intermediate.TupleTypeAnnotation):
@@ -2708,6 +2971,20 @@ err = writeListOfInstancesProperty(
                 item_writer_exprs.append(
                     Stripped(f"asInstanceTupleItemWriter[{item_type}],")
                 )
+
+            elif isinstance(
+                item_type_anno, intermediate.OurTypeAnnotation
+            ) and isinstance(item_type_anno.our_type, intermediate.NamedUnion):
+                # NOTE (mristin):
+                # ``asInstanceTupleItemWriter`` requires an `aastypes.IClass`,
+                # but a named union is deliberately not one, so we reference
+                # a small dedicated adapter, generated once per union, instead
+                # of instantiating that generic here.
+                write_as_tuple_item_function = golang_naming.private_function_name(
+                    Identifier(f"write_{item_type_anno.our_type.name}_as_tuple_item")
+                )
+
+                item_writer_exprs.append(Stripped(f"{write_as_tuple_item_function},"))
 
             else:
                 if isinstance(
@@ -3127,6 +3404,10 @@ const Namespace = {namespace_literal}"""
                 blocks.append(
                     _generate_read_with_lookahead_without_dispatch(cls=our_type)
                 )
+        elif isinstance(our_type, intermediate.NamedUnion):
+            blocks.append(
+                _generate_read_with_lookahead_for_named_union(named_union=our_type)
+            )
         else:
             assert_never(our_type)
 
@@ -3160,6 +3441,8 @@ const Namespace = {namespace_literal}"""
     if len(tuple_arities) > 0:
         blocks.append(_generate_as_scalar_tuple_item_writer())
         blocks.append(_generate_as_instance_tuple_item_writer())
+        for named_union in symbol_table.named_unions:
+            blocks.append(_generate_write_named_union_as_tuple_item(named_union))
         for arity in tuple_arities:
             blocks.append(_generate_write_tuple_helper(arity))
 
@@ -3198,6 +3481,14 @@ const Namespace = {namespace_literal}"""
                 blocks.append(_generate_write_as_sequence(cls=our_type))
 
             blocks.append(_generate_write_for(cls=our_type))
+
+        elif isinstance(our_type, intermediate.NamedUnion):
+            # NOTE (mristin):
+            # A named union is serialized at its call sites through
+            # ``Marshal`` on its underlying instance, so it has no write
+            # function of its own.
+            pass
+
         else:
             assert_never(our_type)
 
